@@ -28,7 +28,8 @@ jobs:
             echo "::warning::CLAUDE_CODE_OAUTH_TOKEN secret is not set; skipping tests tagged claude"
             skip="$skip --exclude-tag claude"
           fi
-          npx e2e run $skip --reporter list,markdown
+          # --strict-cache: a committed recording that no longer replays fails (REPLAY_STALE) instead of calling a model
+          npx e2e run $skip --strict-cache --reporter list,markdown
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       - if: ${{ !cancelled() }}

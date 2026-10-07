@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "voice": "uvx --python 3.12 --prerelease=allow --from \"mlx-audio[server,stt,tts]\" --with \"misaki[en]\" --with \"spacy>=3.8,<4\" --with pip mlx_audio.server --host 127.0.0.1 --port 8765",
-    "test:e2e": "e2e run",
+    "test:e2e": "rm -rf .e2e/data && e2e run",
     "dev:e2e": "SB_DATA_DIR=.e2e/data NEXT_DIST_DIR=.next-e2e next dev --port 3100"
   },
   "dependencies": {

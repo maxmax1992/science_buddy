@@ -70,11 +70,14 @@ test("follow-up question through the agent", { timeout: 360_000, tags: ["claude"
   const id = await seedPaper(app.baseUrl!);
   await app.open(`/#${id}`);
   await agent.act("in the 'Questions on this paper' list on the right, open the question 'Explain this passage.'");
-  await agent.act(
-    "in the conversation panel on the right, type 'What is d_k, in one sentence?' into the follow-up box and press Enter to send it",
-  );
+  const followUp = screen.getByPlaceholder("Ask a follow-up…");
+  await expect(followUp).toBeVisible(); // pins the act's outcome so the replay cache records it
+  // Exact text goes through screen: as an agent step its end state holds Claude's live answer and never replays.
+  await followUp.fill("What is d_k, in one sentence?");
+  await followUp.press("Enter");
   await expect(screen.getByText("What is d_k, in one sentence?").last()).toBeVisible(); // earlier runs may have asked it too
-  await expect(screen.getByRole("button", "Read aloud").last()).toBeVisible({ timeout: 300_000 });
+  // npm run test:e2e starts from an empty library: the "Explain" answer plus this follow-up's answer.
+  await expect(screen.getByRole("button", "Read aloud")).toHaveCount(2, { timeout: 300_000 });
 });
 
 test("opening an unknown paper id is a 404 and leaves the library intact", async ({ app }) => {
