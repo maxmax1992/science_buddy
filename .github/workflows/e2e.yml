@@ -1,0 +1,47 @@
+name: e2e
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: e2e-${{ github.head_ref }}
+  cancel-in-progress: true
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci
+      - run: npx e2e-web install chromium --with-deps
+      # Voice needs the local mlx-audio server (Apple Silicon only).
+      # Claude tests need a subscription token: run `claude setup-token`, save it as the CLAUDE_CODE_OAUTH_TOKEN repo secret.
+      - name: Run e2e
+        run: |
+          skip="--exclude-tag voice"
+          if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            echo "::warning::CLAUDE_CODE_OAUTH_TOKEN secret is not set; skipping tests tagged claude"
+            skip="$skip --exclude-tag claude"
+          fi
+          npx e2e run $skip --reporter list,markdown
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      - if: ${{ !cancelled() }}
+        run: cat .e2e/summary.md >> "$GITHUB_STEP_SUMMARY" || true
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-report
+          path: |
+            .e2e/report.json
+            .e2e/summary.md
+            .e2e/failures
+            .e2e/artifacts
+            .e2e/logs
+          if-no-files-found: warn
+          retention-days: 7
