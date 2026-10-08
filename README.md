@@ -30,4 +30,4 @@ npm run test:e2e                       # all tests
 npx e2e run --grep "rejects input"     # one test
 ```
 
-CI ([.github/workflows/e2e.yml](.github/workflows/e2e.yml)) runs the suite on every PR to `main`, skipping `voice`. Tests tagged `claude` run only when the repo has a `CLAUDE_CODE_OAUTH_TOKEN` secret (create one with `claude setup-token`).
+There is no CI: run the suite locally before pushing to `main`. Skip tags with `--exclude-tag voice` or `--exclude-tag claude`.
