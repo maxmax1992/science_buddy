@@ -21,9 +21,13 @@ Data lives in `data/papers/<id>/` (`paper.pdf`, `meta.json`, `chunks/`, `transcr
 
 ## e2e tests
 
-[TesterArmy e2e](https://e2e.tester.army). `agent.act` / `agent.assert` steps run on Claude through the subscription via a custom executor (`tests/claude-executor.ts`), since e2e's built-in agent needs an API model.
+[TesterArmy e2e](https://e2e.tester.army). `agent.act` / `agent.assert` steps run on Claude through the subscription via a custom executor (`tests/claude-executor.ts`: Haiku picks actions, Sonnet judges assertions), since e2e's built-in agent needs an API model.
+
+Tests run against their own server on :3100 with their own library (`.e2e/data`) and a 2-page fixture paper, so they never touch your papers or threads. The runner starts that server itself; keep `npm run voice` running for the voice test.
 
 ```bash
-npm run test:e2e                       # all tests; app must be running on :3000
+npm run test:e2e                       # all tests
 npx e2e run --grep "rejects input"     # one test
 ```
+
+There is no CI: run the suite locally before pushing to `main`. Skip tags with `--exclude-tag voice` or `--exclude-tag claude`.

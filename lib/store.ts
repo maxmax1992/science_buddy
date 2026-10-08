@@ -115,6 +115,8 @@ const jobs = (): Map<string, Promise<void>> =>
 
 /** Idempotent: no-op when transcribed or already running; resumes from cached chunks after a crash/error. */
 export function ensureTranscript(id: string) {
+  // Unknown ids must not get a directory: a meta-less folder would break listPapers().
+  if (!existsSync(path.join(dir(id), "meta.json"))) return;
   if (jobs().has(id) || existsSync(path.join(dir(id), "transcript.md"))) return;
   const job = transcribe(id)
     .catch((e) => patchMeta(id, { error: e instanceof Error ? e.message : String(e) }))
